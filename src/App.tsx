@@ -8,7 +8,7 @@ import NavBar from './components/NavBar.tsx'
 export default function App() {
   
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen">
     <BrowserRouter>
     <NavBar />
       <Routes>

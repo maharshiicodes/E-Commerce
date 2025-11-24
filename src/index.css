@@ -1,7 +1,15 @@
 @import "tailwindcss";
 
-
-
 @theme{
     --font-montserrat : "Montserrat", sans-serif;
 }
+
+body{
+    background-color: black;
+    color: white; /* Set text to white so you can see it */
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
