@@ -73,12 +73,13 @@
 //         </div>
 //     )
 // }}
-import React, { useContext } from "react";
+import React, { useContext , useState } from "react";
 import { useCart } from '../Context/CartContext.tsx';
 import supabase from "../supabaseClient.ts";
 import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ProductDetail from "./Products/ProductDetail.tsx";
 type CartItem = {
     id: number;
     name: string;
@@ -88,14 +89,83 @@ type CartItem = {
     image_url: string;
 }
 
+
 export default function Cart() {
-    const { items, addToCart, removeFromCart, increaseQuantity, decreaseQuantity, cartTotal } = useCart() || {};
+    const { items, addToCart, removeFromCart, increaseQuantity, decreaseQuantity, cartTotal , clearCart } = useCart() || {};
+    const [orderProcessing ,setOrderProcessing] = useState(false);
+   
+   async function fetchUser(){
+     const { data: { user } } = await supabase.auth.getUser();
+     if(user){
+        return user.email;
+     }
+     return null;
+   }
+   
+    const generateId = () => {
+     return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}   ;
+
+   async function checkOut(e : React.MouseEvent){
+        e.preventDefault();
+        setOrderProcessing(true);
+        const email = await fetchUser();
+        if (!email) {
+            console.error("User not logged in");
+            setOrderProcessing(false);
+            return;
+        }
+        const {data , error} = await supabase
+        .from("Orderss")
+        .insert([
+            {id : generateId() ,created_at : new Date().toISOString() , amount : cartTotal , order_detail : items , email_id :email}
+        ])
+        if(error){
+            console.log("error inserting orders")
+            console.log(error);
+            setOrderProcessing(false);
+
+        }else{
+            console.log("data added successfully")
+            setOrderProcessing(false);
+            clearCart();
+            updateQuantity(items)
+        }
+    }
+    async function updateQuantity(items : CartItem[]){
+       const updatePromise = items.map(async(item) => {
+         const {data : Product , error : fetchError} = await supabase
+         .from("Products")
+         .select("quantity")
+         .eq("id",item.id)
+         .single();
+       
+       if(fetchError || !Product){
+        console.error(`Could not fetch [roduct ${item.id}`, fetchError);
+        return;
+       }
+
+      const newquantity = Product.quantity - item.quantity;
+      if(newquantity < 0){
+        console.error(`Not enough stock to update ${item.id}`);
+      }
+      const {error : updateError} = await supabase
+      .from("Products")
+      .update({quantity : newquantity})
+      .eq("id",item.id)
+      if(updateError){
+        console.error(`Error while updating ${item.id}`,updateError)
+      }})
+      await Promise.all(updatePromise);
+      console.log("All products updated")
+    }
 
     if (!items || !addToCart || !removeFromCart || !increaseQuantity || !decreaseQuantity || cartTotal === undefined) {
         throw new Error("Cart context is not properly initialized");
     }
-
+     
     console.log("Cart Items Loaded:", items);
+    const naviagte = useNavigate();
     if (items.length === 0) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50 text-neutral-900 p-4">
@@ -111,6 +181,7 @@ export default function Cart() {
                     Looks like you haven't added any exclusive threads yet.
                 </p>
                 <button className="bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-neutral-800 transition-all shadow-lg hover:shadow-xl"
+                onClick = {() => naviagte('/shop')}
 >
                     Start Shopping
                 </button>
@@ -236,6 +307,8 @@ export default function Cart() {
                             <motion.button 
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
+                                disabled = {orderProcessing}
+                                onClick = {checkOut}
                                 className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 group hover:shadow-lg hover:shadow-neutral-500/30 transition-all"
                             >
                                 Checkout

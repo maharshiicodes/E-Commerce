@@ -15,6 +15,7 @@ type CartContextType = {
     increaseQuantity : (id : number) => void;
     decreaseQuantity : (id : number) => void;
     cartTotal : number;
+    clearCart : () => void;
 }
 export const CartContext = createContext<CartContextType | undefined >(undefined);
 
@@ -65,9 +66,13 @@ const decreaseQuantity = (id : number) => {
         }).filter((item) => item.quantity > 0);
     })
 }
+
+const clearCart = () => {
+    setItems([]);
+}
 const cartTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
 return (
-        <CartContext.Provider value={{ items, addToCart, removeFromCart, increaseQuantity, decreaseQuantity, cartTotal }}>
+        <CartContext.Provider value={{ items, addToCart, removeFromCart, increaseQuantity, decreaseQuantity, cartTotal , clearCart }}>
             {children}
         </CartContext.Provider>
     );

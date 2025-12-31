@@ -80,6 +80,7 @@ export default function ProductDetail(){
                         </p>
                         
                         <button className="flex-1 bg-black text-white py-4 px-8 rounded-full font-bold text-lg hover:bg-neutral-800 hover:shadow-xl transition-all active:scale-95"
+                        disabled = {product.quantity === 0}
                         onClick = {(e) => handleClick(e, product)}>
                             Add to Cart
                         </button>
