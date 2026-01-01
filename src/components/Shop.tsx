@@ -45,7 +45,8 @@ export default function Shop(){
                  name : product.name,
                  price : product.price,
                  description : product.description,
-                 image_url : product.image_url
+                 image_url : product.image_url,
+                 maxQuantity : product.quantity
              });
          }
      }
@@ -70,14 +71,23 @@ export default function Shop(){
                         {products.map((product: Product) => (
                             <Link key={product.id} to={`/shop/${product.id}`} className="group">
                                 <div className="bg-white rounded-4xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-                                    <div className="relative overflow-hidden aspect-[4/5]">
-                                        <img 
-                                            src={product.image_url} 
-                                            alt={product.name} 
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                                        />
-                                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                    </div>
+                                    <div className={`relative overflow-hidden aspect-[4/5] ${product.quantity === 0 ? 'opacity-60 grayscale' : ''}`}>
+                                            {product.quantity === 0 && (
+                                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                    <span className="bg-neutral-900 text-white px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-full shadow-md">
+                                                        Sold Out
+                                                    </span>
+                                                </div>
+                                            )}
+                                            
+                                            <img 
+                                                src={product.image_url} 
+                                                alt={product.name} 
+                                                
+                                                className={`w-full h-full object-cover transition-transform duration-700 ${product.quantity === 0 ? '' : 'group-hover:scale-110'}`} 
+                                            />
+                                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                        </div>
                                     
                                     <div className="p-6">
                                         <h3 className="font-bold text-xl text-black mb-2 truncate group-hover:text-neutral-600 transition-colors">
@@ -93,9 +103,16 @@ export default function Shop(){
                                             </span>
                                         </div>
                                         <div>
-                                            <button className="flex-1 bg-black text-white py-4 px-8 rounded-full w-full mt-5 font-bold text-lg hover:bg-neutral-800 hover:shadow-xl transition-all active:scale-95"
-                                            disabled = {product.quantity === 0}
-                                            onClick={(e) => handleClick(e, product)}>Add To Cart</button>
+                                        <button 
+                                        className="flex-1 bg-black text-white py-4 px-8 rounded-full w-full mt-5 font-bold text-lg transition-all 
+                                        hover:bg-neutral-800 hover:shadow-xl active:scale-95
+                                        disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:hover:bg-neutral-300 disabled:hover:shadow-none disabled:active:scale-100"
+
+                                        disabled={product.quantity === 0}
+                                        onClick={(e) => handleClick(e, product)}
+                                        >
+                                        {product.quantity === 0 ? "Out of Stock" : "Add To Cart"}
+                                        </button>
                                         </div>
                                     </div>
                                 </div>

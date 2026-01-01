@@ -45,7 +45,8 @@ export default function ProductDetail(){
                     name : product.name,
                     price : product.price,
                     description : product.description,
-                    image_url : product.image_url
+                    image_url : product.image_url,
+                    maxQuantity : product.quantity
                 });
             }
         }
@@ -54,10 +55,19 @@ export default function ProductDetail(){
         <div className="min-h-screen flex items-center justify-center p-6 bg-neutral-900">
             <div className="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-fade-in-up">
                 <div className="w-full md:w-1/2 h-96 md:h-[600px] relative bg-gray-100">
+                {product.quantity === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+            <span className="bg-neutral-900 text-white px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-full shadow-md">
+                Sold Out
+            </span>
+        </div>
+    )}
                     <img 
                         src={product.image_url} 
                         alt={product.name} 
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
+                        className={`w-full h-full object-cover transition-transform duration-700 ease-in-out 
+                                ${product.quantity === 0 ? 'opacity-60 grayscale' : 'group-hover:scale-110'}`
+                                }
                     />
                 </div>
 
@@ -79,10 +89,11 @@ export default function ProductDetail(){
                             ${product.price}
                         </p>
                         
-                        <button className="flex-1 bg-black text-white py-4 px-8 rounded-full font-bold text-lg hover:bg-neutral-800 hover:shadow-xl transition-all active:scale-95"
+                        <button className="flex-1 bg-black text-white py-4 px-8 rounded-full font-bold text-lg hover:bg-neutral-800 hover:shadow-xl transition-all active:scale-95
+                        disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:hover:bg-neutral-300 disabled:hover:shadow-none disabled:active:scale-100"
                         disabled = {product.quantity === 0}
                         onClick = {(e) => handleClick(e, product)}>
-                            Add to Cart
+                           {product.quantity === 0 ? 'Out of Stock' : 'Add to cart'}
                         </button>
                     </div>
 
